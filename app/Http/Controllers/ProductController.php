@@ -17,7 +17,15 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return view('products.index');
+        $products = Product::paginate(2);
+        $variantLists = ProductVariant::distinct()->get(['variant_id', 'variant']);
+        $variant = Variant::all();
+        $productPrices = ProductVariantPrice::all();
+        return view('products.index')
+            ->with('products', $products)
+            ->with('variants', $variant)
+            ->with('variantLists', $variantLists)
+            ->with('productPrices', $productPrices);
     }
 
     /**
@@ -39,7 +47,6 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-
     }
 
 
@@ -51,7 +58,6 @@ class ProductController extends Controller
      */
     public function show($product)
     {
-
     }
 
     /**
@@ -63,7 +69,8 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $variants = Variant::all();
-        return view('products.edit', compact('variants'));
+        $product = Product::find($product->id);
+        return view('products.edit', compact('variants'))->with('product', $product);
     }
 
     /**
@@ -87,5 +94,21 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         //
+    }
+    public function search(Request $request)
+    {
+        $search = $request->query();
+        foreach ($search as $searchParam) {
+            echo $searchParam;
+        }
+        $products = Product::where('price', '<', $search['price'])->paginate(2);
+        $variantLists = ProductVariant::distinct()->get(['variant_id', 'variant']);
+        $variant = Variant::all();
+        $productPrices = ProductVariantPrice::all();
+        return view('products.index')
+            ->with('products', $products)
+            ->with('variants', $variant)
+            ->with('variantLists', $variantLists)
+            ->with('productPrices', $productPrices);
     }
 }
